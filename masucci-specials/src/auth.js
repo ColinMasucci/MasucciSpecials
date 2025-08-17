@@ -1,7 +1,11 @@
 
 
-const clientId = import.meta.env.VITE_CLIENT_ID;
-const redirectUri = import.meta.env.VITE_REDIRECT_URL;
+//const clientId = import.meta.env.VITE_CLIENT_ID;
+//const redirectUri = import.meta.env.VITE_REDIRECT_URL;
+const clientId = "23b9796a3b4341cb8311ee547fa1c366";
+const redirectUri = "https://masucci-specials.vercel.app/callback";
+
+
 const scopes = [
     "user-read-private",
     "user-read-email",
