@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { joinGame, subscribeToSong, submitGuess } from "./playerLogic";
 import { supabase } from './supabaseClient';
 import { fetchSpotifySuggestions } from "./api";
+import { GuessInput } from "./components/GuessInput"
 
 function Player() {
   const [gameId, setGameId] = useState(""); // Game code the player enters
@@ -57,18 +58,6 @@ function Player() {
     }
   };
 
-
-
-//   // Placeholder for autocomplete logic
-//   useEffect(() => {
-//     if (!guess) return setSuggestions([]);
-//     // For now just mimic suggestion results
-//     setSuggestions([
-//       guess + " Song 1",
-//       guess + " Artist 1",
-//       guess + " Song 2",
-//     ]);
-//   }, [guess]);
 
   const handleSubmitGuess = async () => {
     if (!guess || !playerId || !gameId) return;
@@ -149,23 +138,7 @@ function Player() {
             />
 
             {/* Autocomplete dropdown */}
-            {suggestions.length > 0 && (
-              <ul className="absolute top-full left-0 right-0 bg-white text-black rounded shadow mt-1 max-h-40 overflow-auto z-10">
-                {suggestions.map((s, i) => (
-                    <li
-                    key={i}
-                    className="p-2 hover:bg-gray-200 cursor-pointer"
-                    onClick={() => {
-                        setGuess(s.name); // select suggestion
-                        setSuggestions([]);
-                    }}
-                    >
-                    {s.type === "track" ? `${s.name} - ${s.artists}` : s.name} 
-                    </li>
-                ))}
-              </ul>
-
-            )}
+            <GuessInput/>
           </div>
 
           {/* Submit button */}
