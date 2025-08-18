@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { joinGame, subscribeToSong, submitGuess } from "./playerLogic";
+import { supabase } from './supabaseClient';
 
 function Player() {
   const [gameId, setGameId] = useState(""); // Game code the player enters
