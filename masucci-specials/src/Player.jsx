@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { joinGame, subscribeToSong, submitGuess } from "./playerLogic";
 import { supabase } from './supabaseClient';
 import { fetchSpotifySuggestions } from "./api";
@@ -12,6 +12,8 @@ function Player() {
   const [suggestions, setSuggestions] = useState([]);
   const [score, setScore] = useState(0);
   const [token, setToken] = useState(null); // Spotify access token
+  const [open, setOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
 
   // Join lobby
@@ -58,18 +60,6 @@ function Player() {
   };
 
 
-
-//   // Placeholder for autocomplete logic
-//   useEffect(() => {
-//     if (!guess) return setSuggestions([]);
-//     // For now just mimic suggestion results
-//     setSuggestions([
-//       guess + " Song 1",
-//       guess + " Artist 1",
-//       guess + " Song 2",
-//     ]);
-//   }, [guess]);
-
   const handleSubmitGuess = async () => {
     if (!guess || !playerId || !gameId) return;
     try {
@@ -91,7 +81,18 @@ function Player() {
     }, 300); // wait 300ms after user stops typing
 
     return () => clearTimeout(handler);
-    }, [guess, token]);
+  }, [guess, token]);
+
+    // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <div className="flex flex-col items-center justify-start min-h-screen bg-blue-900 p-4">
@@ -139,7 +140,7 @@ function Player() {
           <p className="text-white text-sm">Current song is playing...</p>
 
           {/* Guess input */}
-          <div className="relative">
+          <div ref={dropdownRef} className="relative">
             <input
               type="text"
               placeholder="Guess song or artist"
