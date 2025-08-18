@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { joinGame, subscribeToSong, submitGuess } from "./playerLogic";
 import { supabase } from './supabaseClient';
 import { fetchSpotifySuggestions } from "./api";
-import { GuessInput } from "./components/GuessInput"
+import GuessInput from "./components/GuessInput"
 
 function Player() {
   const [gameId, setGameId] = useState(""); // Game code the player enters

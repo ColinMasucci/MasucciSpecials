@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from "react";
 
 function GuessInput({ suggestions, setGuess, setSuggestions }) {
   const [open, setOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef(null);
 
   // Close dropdown on outside click
   useEffect(() => {
