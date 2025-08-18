@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from "react";
-import { fetchSpotifySuggestions } from "./api"; // your Spotify API helper
+import { fetchSpotifySuggestions } from "../api"; // your Spotify API helper
 
 function GuessInput({ token, onSelect }) {
   const [guess, setGuess] = useState("");
