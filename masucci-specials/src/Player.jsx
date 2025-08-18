@@ -1,51 +1,145 @@
-import { supabase } from './supabaseClient';
-
-export async function joinGame(gameId, playerName) {
-  const { data, error } = await supabase
-    .from('players')
-    .insert([{ game_id: gameId, name: playerName }])
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data; // contains player id
-}
-
-export function subscribeToSong(gameId, callback) {
-  return supabase
-    .channel('game-updates')
-    .on(
-      'postgres_changes',
-      {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'games',
-        filter: `id=eq.${gameId}`,
-      },
-      (payload) => {
-        callback(payload.new.current_song);
-      }
-    )
-    .subscribe();
-}
-
-export async function submitGuess(playerId, gameId, guess) {
-  const { data, error } = await supabase
-    .from('guesses')
-    .insert([{ player_id: playerId, game_id: gameId, guess }]);
-
-  if (error) throw error;
-  return data;
-}
-
+import { useState, useEffect } from "react";
+import { joinGame, subscribeToSong, submitGuess } from "./playerLogic";
 
 function Player() {
+  const [gameId, setGameId] = useState(""); // Game code the player enters
+  const [playerName, setPlayerName] = useState("");
+  const [playerId, setPlayerId] = useState(null);
+  const [currentSong, setCurrentSong] = useState(null);
+  const [guess, setGuess] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [score, setScore] = useState(0);
 
-    return (
-        <div>
-            <h1>This is the player Page</h1>
+  // Join lobby
+  const handleJoin = async () => {
+    if (!gameId || !playerName) return alert("Enter a name and game code");
+    try {
+      const player = await joinGame(gameId, playerName);
+      setPlayerId(player.id);
+
+      // Subscribe to updates from host
+      subscribeToSong(gameId, (songUri) => {
+        setCurrentSong(songUri);
+      });
+    } catch (error) {
+      console.error(error);
+      alert("Failed to join game");
+    }
+  };
+
+  // Placeholder for autocomplete logic
+  useEffect(() => {
+    if (!guess) return setSuggestions([]);
+    // For now just mimic suggestion results
+    setSuggestions([
+      guess + " Song 1",
+      guess + " Artist 1",
+      guess + " Song 2",
+    ]);
+  }, [guess]);
+
+  const handleSubmitGuess = async () => {
+    if (!guess || !playerId || !gameId) return;
+    try {
+      await submitGuess(playerId, gameId, guess);
+      setGuess("");
+      setSuggestions([]);
+      // score increment can be added later when validating
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-start min-h-screen bg-blue-900 p-4">
+      {/* Title */}
+      <h1 className="text-white text-2xl sm:text-3xl font-bold mb-2 text-center">
+        🎵 The Masucci Heardle Special 🎵
+      </h1>
+
+      {/* Game ID display */}
+      {gameId && (
+        <p className="text-gray-300 text-sm mb-4 self-end">
+          Lobby ID: {gameId}
+        </p>
+      )}
+
+      {/* Join game section */}
+      {!playerId && (
+        <div className="flex flex-col w-full max-w-md gap-2 mb-4">
+          <input
+            type="text"
+            placeholder="Enter your name"
+            value={playerName}
+            onChange={(e) => setPlayerName(e.target.value)}
+            className="p-2 rounded text-black"
+          />
+          <input
+            type="text"
+            placeholder="Enter game code"
+            value={gameId}
+            onChange={(e) => setGameId(e.target.value)}
+            className="p-2 rounded text-black"
+          />
+          <button
+            onClick={handleJoin}
+            className="bg-green-500 text-white p-2 rounded font-bold"
+          >
+            Join Game
+          </button>
         </div>
-    );
+      )}
+
+      {/* Current Song */}
+      {playerId && (
+        <div className="flex flex-col w-full max-w-md bg-gray-900 rounded p-4 gap-2">
+          <p className="text-white text-sm">Current song is playing...</p>
+
+          {/* Guess input */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Guess song or artist"
+              value={guess}
+              onChange={(e) => setGuess(e.target.value)}
+              className="w-full p-2 rounded text-black"
+            />
+
+            {/* Autocomplete dropdown */}
+            {suggestions.length > 0 && (
+              <ul className="absolute top-full left-0 right-0 bg-white text-black rounded shadow mt-1 max-h-40 overflow-auto z-10">
+                {suggestions.map((s, i) => (
+                  <li
+                    key={i}
+                    className="p-2 hover:bg-gray-200 cursor-pointer"
+                    onClick={() => {
+                      setGuess(s);
+                      setSuggestions([]);
+                    }}
+                  >
+                    {s}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* Submit button */}
+          <button
+            onClick={handleSubmitGuess}
+            className="bg-green-500 text-white p-2 rounded font-bold mt-2"
+          >
+            Submit Guess
+          </button>
+
+          {/* Score */}
+          <div className="mt-2 text-white font-bold">
+            Score: {score}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default Player;

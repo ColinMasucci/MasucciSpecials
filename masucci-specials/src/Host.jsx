@@ -146,7 +146,7 @@ function Host() {
             <select
                 value={selectedPlaylist}
                 onChange={(e) => setSelectedPlaylist(e.target.value)}
-                className="p-2 rounded max-w-20"
+                className="p-2 rounded max-w-35"
               >
                 <option value="random">Random Spotify Track</option>
                 {playlists.map(p => (
@@ -180,9 +180,9 @@ function Host() {
               </button>
 
               {gameId ? (
-                <div>
-                  <p>To join game go to 'https://masucci-special.vercel.com/player' and enter code:</p>
-                  <h2 className="text-lg">{gameId}</h2>
+                <div className="flex justify-center items-center">
+                  <p className="text-center">To join game go to 'https://masucci-special.vercel.com/player' and enter code:</p>
+                  <h1 className="text-md font-bold text-center">{gameId}</h1>
                   <button
                     onClick={async () => {
                       if (!gameId) return;
