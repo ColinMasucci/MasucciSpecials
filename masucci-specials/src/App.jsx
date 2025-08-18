@@ -37,24 +37,43 @@ function App() {
     fetchProfile();
   }, [token]);
 
-  if (!token) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <button
-          onClick={redirectToAuthCodeFlow}
-          className="bg-green-500 text-white px-6 py-3 rounded-lg"
-        >
-          Login with Spotify
-        </button>
-      </div>
-    );
-  }
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">Welcome, {profile?.display_name}</h1>
-      <p>Email: {profile?.email}</p>
-      <img src={profile?.images?.[0]?.url} alt="profile" width={100} />
+    <div className="bg-blue-900 flex h-screen overflow-hidden">
+      {/*Side Profile*/}
+      <div className="bg-blue-950 w-64 p-7">
+        {token ? (
+          <div>
+            <h1 className="text-2xl font-bold text-white flex-col pb-5">Welcome, {profile?.display_name}</h1>
+            <p>Email: {profile?.email}</p>
+            <img className="rounded-full" src={profile?.images?.[0]?.url} alt="profile" width={100} />
+          </div>
+        ):(
+          <div className="flex h-screen flex-col">
+            <h1 className="text-2xl font-bold text-white pb-5">No Profile Found</h1>
+            <button
+              onClick={redirectToAuthCodeFlow}
+              className="bg-green-500 text-white px-6 py-3 rounded-lg"
+            >
+              Login with Spotify
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-col justify-start flex-1 p-7">
+        <h1 className="font-bold text-white text-center pb-5">🎵The Masucci Heardle Special🎵</h1>
+        {token ? (
+          <div></div>
+        ):(
+          <div>
+            <p className="text-white text-center">Login to your Spotify Account in order to use Application</p>
+          </div>
+        )}
+
+
+      </div>
+      
     </div>
   );
 }
