@@ -237,8 +237,8 @@ function Host() {
                       try {
                         const game = await createGame(profile.id, token); // use Spotify profile ID as hostId
                         setGameId(game.id);
-                        setGameCode(game.gameCode)
-                        //alert(`Lobby created! Share this code with players: ${game.code.slice(0, 6)}`);
+                        setGameCode(game.game_code);
+                        alert(`Lobby created! Share this code with players: ${game.game_code.slice(0, 6)}`);
                       } catch (error) {
                         console.error(error);
                         alert("Failed to create lobby.");
