@@ -16,7 +16,7 @@ function validateGuess(guess, currentSongName, currentSongArtist) {
   const isArtistCorrect = normalizedGuess.includes(correctArtist);
 
   return {
-    correct: isTrackCorrect, // || isArtistCorrect,
+    correct: isTrackCorrect && isArtistCorrect,
     type: isTrackCorrect && isArtistCorrect ? "full" : isArtistCorrect ? "artist" : null
   };
 }
