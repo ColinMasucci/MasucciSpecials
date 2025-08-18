@@ -138,7 +138,11 @@ function Player() {
             />
 
             {/* Autocomplete dropdown */}
-            <GuessInput/>
+            <GuessInput
+                suggestions={suggestions}
+                setGuess={setGuess}
+                setSuggestions={setSuggestions}
+            />
           </div>
 
           {/* Submit button */}
