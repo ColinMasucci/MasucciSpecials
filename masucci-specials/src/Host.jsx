@@ -27,10 +27,14 @@ export async function createGame(hostId, token) {
 }
 
 
-export async function updateCurrentSong(gameId, trackUri) {
+export async function updateCurrentSong(gameId, trackUri, trackName, trackArtist) {
   const { data, error } = await supabase
     .from('games')
-    .update({ current_song: trackUri })
+    .update({
+      current_song_uri: trackUri,
+      current_song_name: trackName,
+      current_song_artist: trackArtist
+    })
     .eq('id', gameId)
     .select()
     .single();
@@ -134,7 +138,7 @@ function Host() {
       //alert(`Now playing: ${track.name} by ${track.artists.map(a => a.name).join(", ")}`);
       if (gameId) {
         try {
-          await updateCurrentSong(gameId, track.uri);
+          await updateCurrentSong(gameId, track.uri, track.name, track.artists.map(a => a.name).join(", "));
         } catch (error) {
           console.error("Failed to update current song:", error);
         }

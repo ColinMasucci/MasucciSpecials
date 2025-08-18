@@ -4,12 +4,13 @@ import { supabase } from './supabaseClient';
 import { fetchSpotifySuggestions } from "./api";
 
 
-function validateGuess(guess, currentSong) {
-  if (!currentSong) return { correct: false, type: null };
+function validateGuess(guess, currentSongName, currentSongArtist) {
+  if (!currentSongName || !currentSongArtist) return { correct: false, type: null };
+
 
   const normalizedGuess = guess.trim().toLowerCase();
-  const correctTrack = currentSong.trackName.toLowerCase();
-  const correctArtist = currentSong.artistName.toLowerCase();
+  const correctTrack = currentSongName.toLowerCase();
+  const correctArtist = currentSongArtist.toLowerCase();
 
   const isTrackCorrect = normalizedGuess.includes(correctTrack);
   const isArtistCorrect = normalizedGuess.includes(correctArtist);
@@ -38,7 +39,8 @@ function Player() {
   const [gameId, setGameId] = useState(""); // Game code the player enters
   const [playerName, setPlayerName] = useState("");
   const [playerId, setPlayerId] = useState(null);
-  const [currentSong, setCurrentSong] = useState(null);
+  const [currentSongName, setCurrentSongName] = useState(null);
+  const [currentSongArtist, setCurrentSongArtist] = useState(null);
   const [guess, setGuess] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [score, setScore] = useState(0);
@@ -79,9 +81,10 @@ function Player() {
         console.log("Received Host Spotify token:", data.spotify_token);
 
         // 3. Subscribe to song updates
-        subscribeToSong(gameId, (songUri) => {
-        console.log("Received song update:", songUri);
-        setCurrentSong(songUri);
+        subscribeToSong(gameId, (songName, songArtist) => {
+        console.log("Received song update:", songName, " - ", songArtist);
+        setCurrentSongName(songName);
+        setCurrentSongArtist(songArtist)
         });
 
         // 4. Optionally, indicate player has successfully joined
@@ -122,7 +125,7 @@ function Player() {
         }
 
         // Validate the guess
-        const { correct, type } = validateGuess(guess, currentSong);
+        const { correct, type } = validateGuess(guess, currentSongName, currentSongArtist);
         console.log("Guess validation result:", { guess, correct, type });
 
         if (!correct) {

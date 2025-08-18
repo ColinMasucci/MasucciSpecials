@@ -23,7 +23,9 @@ export function subscribeToSong(gameId, callback) {
         filter: `id=eq.${gameId}`,
       },
       (payload) => {
-        callback(payload.new.current_song);
+        const songName = payload.new.current_song_name;
+        const songArtist = payload.new.current_song_artist;
+        callback(songName, songArtist);
       }
     )
     .subscribe();
