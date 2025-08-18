@@ -10,7 +10,6 @@ function Player() {
   const [playerId, setPlayerId] = useState(null);
   const [currentSong, setCurrentSong] = useState(null);
   const [guess, setGuess] = useState("");
-  const [suggestions, setSuggestions] = useState([]);
   const [score, setScore] = useState(0);
   const [token, setToken] = useState(null); // Spotify access token
 
@@ -62,25 +61,13 @@ function Player() {
   const handleSubmitGuess = async () => {
     if (!guess || !playerId || !gameId) return;
     try {
-      await submitGuess(playerId, gameId, guess);
-      setGuess("");
-      setSuggestions([]);
-      // score increment can be added later when validating
+        await submitGuess(playerId, gameId, guess);
+        setGuess(""); // reset input after submission
     } catch (error) {
-      console.error(error);
+        console.error(error);
     }
   };
 
-  useEffect(() => {
-    if (!guess || !token) return setSuggestions([]);
-
-    const handler = setTimeout(async () => {
-        const results = await fetchSpotifySuggestions(guess, token);
-        setSuggestions(results);
-    }, 300); // wait 300ms after user stops typing
-
-    return () => clearTimeout(handler);
-    }, [guess, token]);
 
   return (
     <div className="flex flex-col items-center justify-start min-h-screen bg-blue-900 p-4">
@@ -130,9 +117,8 @@ function Player() {
           {/* Guess input */}
           <div className="relative">
             <GuessInput
-                suggestions={suggestions}
-                setGuess={setGuess}
-                setSuggestions={setSuggestions}
+                token={token}
+                onSelect={(selectedGuess) => setGuess(selectedGuess)}
             />
           </div>
 
