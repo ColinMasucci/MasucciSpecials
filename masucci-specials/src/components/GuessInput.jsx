@@ -24,10 +24,11 @@ function GuessInput({ suggestions, setGuess, setSuggestions }) {
     <div ref={dropdownRef} className="relative w-full">
       <input
         type="text"
+        placeholder="Guess song or artist"
         className="w-full p-2 rounded border text-black"
         onFocus={() => setOpen(true)}
         onChange={(e) => {
-          // trigger search / suggestions logic
+          setGuess(e.target.value)
           setOpen(true);
         }}
       />

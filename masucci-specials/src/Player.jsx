@@ -129,15 +129,6 @@ function Player() {
 
           {/* Guess input */}
           <div className="relative">
-            <input
-              type="text"
-              placeholder="Guess song or artist"
-              value={guess}
-              onChange={(e) => setGuess(e.target.value)}
-              className="w-full p-2 rounded text-black"
-            />
-
-            {/* Autocomplete dropdown */}
             <GuessInput
                 suggestions={suggestions}
                 setGuess={setGuess}
