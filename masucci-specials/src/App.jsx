@@ -111,6 +111,18 @@ function App() {
             <h1 className="text-2xl font-bold text-white flex-col pb-5">Welcome, {profile?.display_name}</h1>
             <img className="rounded-full" src={profile?.images?.[0]?.url} alt="profile" width={100} />
             <p className="text-white">Email: {profile?.email}</p>
+
+            <h2 className="font-bold pt-10">Playlist:</h2>
+            <select
+                value={selectedPlaylist}
+                onChange={(e) => setSelectedPlaylist(e.target.value)}
+                className="p-2 rounded"
+              >
+                <option value="random">Random Spotify Track</option>
+                {playlists.map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
           </div>
         ):(
           <div className="flex h-screen flex-col">
@@ -130,16 +142,6 @@ function App() {
           <h1 className="font-bold text-white text-center pb-5">🎵The Masucci Heardle Special🎵</h1>
           {token ? (
             <div className="flex flex-col gap-3">
-              <select
-                value={selectedPlaylist}
-                onChange={(e) => setSelectedPlaylist(e.target.value)}
-                className="p-2 rounded"
-              >
-                <option value="random">Random Spotify Track</option>
-                {playlists.map(p => (
-                  <option key={p.id} value={p.id}>{p.name}</option>
-                ))}
-              </select>
               <button
                 onClick={handlePlay}
                 className="bg-green-500 text-white px-4 py-2 rounded"
@@ -195,13 +197,13 @@ function App() {
               }}
               className="text-white text-2xl rounded-full bg-green-500"
             >
-              {isPlaying ? <FaPlay /> : <FaPause/>}
+              {isPlaying ? <FaPause/> : <FaPlay/>}
             </button>
 
           </div>
         ):
         (
-          <div className="w-full bg-gray-900 p-4 flex items-center justify-items-end gap-4 shadow-lg">
+          <div className="w-full bg-gray-900 p-4 flex items-center justify-end gap-4 shadow-lg">
             {/* Progress bar */}
             <div className="flex flex-col items-center w-1/2">
               <div className="w-full h-1 bg-gray-700 rounded"></div>
