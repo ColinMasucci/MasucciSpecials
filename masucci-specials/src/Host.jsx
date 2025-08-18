@@ -70,6 +70,7 @@ function Host() {
   const [progressMs, setProgressMs] = useState(0); // current position in ms
 
   const [gameId, setGameId] = useState(null);
+  const [gameCode, setGameCode] = useState(null);
 
 
   // --- Auth
@@ -213,7 +214,7 @@ function Host() {
               {gameId ? (
                 <div className="flex flex-col justify-center items-center">
                   <p className="text-center text-white">To join game go to 'https://masucci-special.vercel.com/player' and enter code:</p>
-                  <h1 className="text-[0.95rem] font-bold text-center text-white">{gameId}</h1>
+                  <h1 className="text-[0.95rem] font-bold text-center text-white">{gameCode}</h1>
                   <button
                     onClick={async () => {
                       if (!gameId) return;
@@ -236,7 +237,8 @@ function Host() {
                       try {
                         const game = await createGame(profile.id, token); // use Spotify profile ID as hostId
                         setGameId(game.id);
-                        alert(`Lobby created! Share this code with players: ${game.id.slice(0, 6)}`);
+                        setGameCode(game.gameCode)
+                        //alert(`Lobby created! Share this code with players: ${game.code.slice(0, 6)}`);
                       } catch (error) {
                         console.error(error);
                         alert("Failed to create lobby.");
