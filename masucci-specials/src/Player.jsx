@@ -61,33 +61,32 @@ function Player() {
     try {
         console.log("Attempting to join game:", gameCode, "as player:", playerName);
 
-        // 1. Join the game
-        const player = await joinGame(gameCode, playerName);
+        // 0. Lookup the game by its short code first
+        const { data: game, error: gameError } = await supabase
+            .from('games')
+            .select('id, spotify_token')
+            .eq('game_code', gameCode)
+            .single();
+
+        if (gameError || !game) throw new Error("Game not found");
+
+        const gameId = game.id; // actual UUID for the game
+        setToken(game.spotify_token); // set Spotify token
+        console.log("Game UUID:", gameId, "Spotify token:", game.spotify_token);
+
+        // 1. Join the game using the actual UUID
+        const player = await joinGame(gameId, playerName);
         if (!player || !player.id) throw new Error("Failed to create player entry");
         setPlayerId(player.id);
         console.log("Joined as player:", player);
 
-        // 2. Fetch the Host's Spotify token
-        const { data, error } = await supabase
-        .from('games')
-        .select('spotify_token')
-        .eq('game_code', gameCode)
-        .single();
-
-        if (error) throw new Error("Failed to fetch Spotify token: " + error.message);
-        if (!data || !data.spotify_token) throw new Error("No Spotify token found for this game");
-
-        setToken(data.spotify_token);
-        console.log("Received Host Spotify token:", data.spotify_token);
-
-        // 3. Subscribe to song updates
-        subscribeToSong(gameCode, (songName, songArtist) => {
-        console.log("Received song update:", songName, " - ", songArtist);
-        setCurrentSongName(songName);
-        setCurrentSongArtist(songArtist);
+        // 2. Subscribe to song updates
+        subscribeToSong(gameId, (songName, songArtist) => {
+            console.log("Received song update:", songName, " - ", songArtist);
+            setCurrentSongName(songName);
+            setCurrentSongArtist(songArtist);
         });
 
-        // 4. Optionally, indicate player has successfully joined
         console.log("Player successfully joined and listening for updates!");
 
     } catch (err) {
@@ -95,6 +94,7 @@ function Player() {
         alert("Failed to join game: " + err.message);
     }
   };
+
 
   useEffect(() => {
     if (!currentSongName) return;
