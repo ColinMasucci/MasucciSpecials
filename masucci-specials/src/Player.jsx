@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { joinGame, subscribeToSong, submitGuess } from "./playerLogic";
 import { supabase } from './supabaseClient';
 import { fetchSpotifySuggestions } from "./api";
