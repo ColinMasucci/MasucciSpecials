@@ -32,7 +32,7 @@ function Player() {
         const { data, error } = await supabase
         .from('games')
         .select('spotify_token')
-        .eq('id', Number(gameId)) // cast if your ID is numeric
+        .eq('id', gameId)
         .single();
 
         if (error) throw new Error("Failed to fetch Spotify token: " + error.message);
