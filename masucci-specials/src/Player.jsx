@@ -36,6 +36,7 @@ function calculatePoints(type, startTime) {
 
 
 function Player() {
+  const [gameId, setGameId] = useState("");
   const [gameCode, setGameCode] = useState(""); // Game code the player enters
   const [playerName, setPlayerName] = useState("");
   const [playerId, setPlayerId] = useState(null);
@@ -70,9 +71,9 @@ function Player() {
 
         if (gameError || !game) throw new Error("Game not found");
 
-        const gameId = game.id; // actual UUID for the game
+        setGameId(game.id); // actual UUID for the game
         setToken(game.spotify_token); // set Spotify token
-        console.log("Game UUID:", gameId, "Spotify token:", game.spotify_token);
+        console.log("Game UUID:", game.id, "Spotify token:", game.spotify_token);
 
         // 1. Join the game using the actual UUID
         const player = await joinGame(gameId, playerName);
@@ -139,7 +140,7 @@ function Player() {
         setHasGuessedCorrectly(true);
 
         // Attempt to submit the guess to Supabase
-        const result = await submitGuess(playerId, gameCode, guess);
+        const result = await submitGuess(playerId, gameId, guess);
         if (!result) {
         console.error("submitGuess returned null or undefined!");
         return alert("Error submitting guess. Check console.");
