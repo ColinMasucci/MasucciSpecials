@@ -136,8 +136,13 @@ function Player() {
 
         // Calculate points based on speed
         const points = calculatePoints(type, startTime);
-        setScore(prev => prev + points);
+        const newScore = score + points;
+        setScore(newScore);
         setHasGuessedCorrectly(true);
+        await supabase
+            .from('players')
+            .update({ score: newScore })
+            .eq('id', playerId);
 
         // Attempt to submit the guess to Supabase
         const result = await submitGuess(playerId, gameId, guess);

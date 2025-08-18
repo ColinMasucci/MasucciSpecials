@@ -222,7 +222,7 @@ function Host() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [gameId]);
+  }, [gameId, currentTrack]);
 
 
 
