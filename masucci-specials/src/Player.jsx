@@ -36,7 +36,7 @@ function calculatePoints(type, startTime) {
 
 
 function Player() {
-  const [gameId, setGameId] = useState(""); // Game code the player enters
+  const [gameCode, setGameCode] = useState(""); // Game code the player enters
   const [playerName, setPlayerName] = useState("");
   const [playerId, setPlayerId] = useState(null);
   const [currentSongName, setCurrentSongName] = useState(null);
@@ -54,15 +54,15 @@ function Player() {
 
   // Join lobby
   const handleJoin = async () => {
-    if (!gameId || !playerName) {
+    if (!gameCode || !playerName) {
         return alert("Enter both a name and game code");
     }
 
     try {
-        console.log("Attempting to join game:", gameId, "as player:", playerName);
+        console.log("Attempting to join game:", gameCode, "as player:", playerName);
 
         // 1. Join the game
-        const player = await joinGame(gameId, playerName);
+        const player = await joinGame(gameCode, playerName);
         if (!player || !player.id) throw new Error("Failed to create player entry");
         setPlayerId(player.id);
         console.log("Joined as player:", player);
@@ -71,7 +71,7 @@ function Player() {
         const { data, error } = await supabase
         .from('games')
         .select('spotify_token')
-        .eq('id', gameId)
+        .eq('game_code', gameCode)
         .single();
 
         if (error) throw new Error("Failed to fetch Spotify token: " + error.message);
@@ -81,7 +81,7 @@ function Player() {
         console.log("Received Host Spotify token:", data.spotify_token);
 
         // 3. Subscribe to song updates
-        subscribeToSong(gameId, (songName, songArtist) => {
+        subscribeToSong(gameCode, (songName, songArtist) => {
         console.log("Received song update:", songName, " - ", songArtist);
         setCurrentSongName(songName);
         setCurrentSongArtist(songArtist);
@@ -111,7 +111,7 @@ function Player() {
         console.warn("No guess entered.");
         return alert("Please enter a guess before submitting!");
         }
-        if (!playerId || !gameId) {
+        if (!playerId || !gameCode) {
         console.error("Player ID or Game ID is missing.");
         return alert("Cannot submit guess: Player or game not set.");
         }
@@ -139,7 +139,7 @@ function Player() {
         setHasGuessedCorrectly(true);
 
         // Attempt to submit the guess to Supabase
-        const result = await submitGuess(playerId, gameId, guess);
+        const result = await submitGuess(playerId, gameCode, guess);
         if (!result) {
         console.error("submitGuess returned null or undefined!");
         return alert("Error submitting guess. Check console.");
@@ -197,9 +197,9 @@ function Player() {
       </h1>
 
       {/* Game ID display */}
-      {gameId && (
+      {gameCode && (
         <p className="text-gray-300 text-sm mb-4 self-end">
-          Lobby ID: {gameId}
+          Lobby ID: {gameCode}
         </p>
       )}
 
@@ -216,8 +216,8 @@ function Player() {
           <input
             type="text"
             placeholder="Enter game code"
-            value={gameId}
-            onChange={(e) => setGameId(e.target.value)}
+            value={gameCode}
+            onChange={(e) => setGameCode(e.target.value)}
             className="p-2 rounded text-black"
           />
           <button

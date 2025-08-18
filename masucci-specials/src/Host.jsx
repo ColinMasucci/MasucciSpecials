@@ -5,11 +5,27 @@ import { createSpotifyPlayer, playTrack } from "./audioplayer.js";
 import { FaPlay, FaPause } from "react-icons/fa";
 import { supabase } from './supabaseClient';
 
+function generateGameCode(length = 6) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let code = '';
+  for (let i = 0; i < length; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
 export async function createGame(hostId, token) {
+
+  const gameCode = generateGameCode();
   // 1. Insert new game
   const { data, error } = await supabase
     .from('games')
-    .insert([{ host_id: hostId, current_song_uri: null, current_song_name: null, current_song_artist: null }])
+    .insert([{ host_id: hostId, 
+      current_song_uri: null, 
+      current_song_name: null, 
+      current_song_artist: null, 
+      game_code: gameCode 
+    }])
     .select()
     .single();
 
@@ -23,7 +39,7 @@ export async function createGame(hostId, token) {
     .update({ spotify_token: token })
     .eq('id', gameId);
 
-  return data; // contains gameId
+  return { ...data, game_code: gameCode }; // contains gameId
 }
 
 
