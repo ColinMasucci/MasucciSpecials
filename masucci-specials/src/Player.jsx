@@ -21,6 +21,8 @@ function Player() {
 
     try {
         console.log("Attempting to join game:", gameId, "as player:", playerName);
+        console.log("handleJoin called with gameId:", typeof gameId, gameId);
+
 
         // 1. Join the game
         const player = await joinGame(gameId, playerName);
