@@ -68,6 +68,7 @@ function Host() {
   const [currentTrack, setCurrentTrack] = useState(null); // holds track info
   const [isPlaying, setIsPlaying] = useState(false);
   const [progressMs, setProgressMs] = useState(0); // current position in ms
+  const [showSongDetails, setShowSongDetails] = useState(true); //for displaying song artist and name
 
   const [gameId, setGameId] = useState(null);
   const [gameCode, setGameCode] = useState(null);
@@ -261,17 +262,21 @@ function Host() {
       {/* Track Section */}
         {currentTrack ? (
           <div className="w-full bg-gray-900 p-4 flex items-center justify-items-end gap-4 shadow-lg">
-            
+            <button onClick={setShowSongDetails(prev => !prev)}>
+              {showSongDetails ? "Show Song Details" : "Hide Song Details"}
+            </button>
             {/* Song / Artist info */}
-            <div className="flex flex-col text-white flex-1">
-              <div className="flex items-center gap-2">
-                <span className="font-bold">{currentTrack.name}</span>
-                <img src={currentTrack.album.images[2]?.url} alt="song" className="w-6 h-6 rounded" />
+            {showSongDetails && (
+              <div className="flex flex-col text-white flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold">{currentTrack.name}</span>
+                  <img src={currentTrack.album.images[2]?.url} alt="song" className="w-6 h-6 rounded" />
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-400">
+                  <span>{currentTrack.artists.map(a => a.name).join(", ")}</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-sm text-gray-400">
-                <span>{currentTrack.artists.map(a => a.name).join(", ")}</span>
-              </div>
-            </div>
+            )}
 
             {/* Progress bar */}
             <div className="flex flex-col items-center w-1/2">
