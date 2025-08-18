@@ -193,7 +193,7 @@ function Host() {
               {gameId ? (
                 <div className="flex flex-col justify-center items-center">
                   <p className="text-center text-white">To join game go to 'https://masucci-special.vercel.com/player' and enter code:</p>
-                  <h1 className="text-md font-bold text-center text-white">{gameId}</h1>
+                  <h1 className="text-[0.95rem] font-bold text-center text-white">{gameId}</h1>
                   <button
                     onClick={async () => {
                       if (!gameId) return;
@@ -248,7 +248,6 @@ function Host() {
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-400">
                 <span>{currentTrack.artists.map(a => a.name).join(", ")}</span>
-                <img src={currentTrack.album.images[2]?.url} alt="artist" className="w-4 h-4 rounded-full" />
               </div>
             </div>
 

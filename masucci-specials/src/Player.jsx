@@ -14,44 +14,59 @@ function Player() {
 
   // Join lobby
   const handleJoin = async () => {
-  if (!gameId || !playerName) return alert("Enter a name and game code");
+    if (!gameId || !playerName) {
+        return alert("Enter both a name and game code");
+    }
 
-  try {
-    // Join the game
-    const player = await joinGame(gameId, playerName);
-    setPlayerId(player.id);
+    try {
+        console.log("Attempting to join game:", gameId, "as player:", playerName);
 
-    // Get Host's Spotify token for autocomplete
-    const { data, error } = await supabase
-      .from('games')
-      .select('spotify_token')
-      .eq('id', gameId)
-      .single();
+        // 1. Join the game
+        const player = await joinGame(gameId, playerName);
+        if (!player || !player.id) throw new Error("Failed to create player entry");
+        setPlayerId(player.id);
+        console.log("Joined as player:", player);
 
-    if (error) throw error;
-    setToken(data.spotify_token);
+        // 2. Fetch the Host's Spotify token
+        const { data, error } = await supabase
+        .from('games')
+        .select('spotify_token')
+        .eq('id', Number(gameId)) // cast if your ID is numeric
+        .single();
 
-    // Subscribe to updates from host
-    subscribeToSong(gameId, (songUri) => {
-      setCurrentSong(songUri);
-    });
-  } catch (error) {
-    console.error(error);
-    alert("Failed to join game");
-  }
-};
+        if (error) throw new Error("Failed to fetch Spotify token: " + error.message);
+        if (!data || !data.spotify_token) throw new Error("No Spotify token found for this game");
+
+        setToken(data.spotify_token);
+        console.log("Received Host Spotify token:", data.spotify_token);
+
+        // 3. Subscribe to song updates
+        subscribeToSong(gameId, (songUri) => {
+        console.log("Received song update:", songUri);
+        setCurrentSong(songUri);
+        });
+
+        // 4. Optionally, indicate player has successfully joined
+        console.log("Player successfully joined and listening for updates!");
+
+    } catch (err) {
+        console.error(err);
+        alert("Failed to join game: " + err.message);
+    }
+  };
 
 
-  // Placeholder for autocomplete logic
-  useEffect(() => {
-    if (!guess) return setSuggestions([]);
-    // For now just mimic suggestion results
-    setSuggestions([
-      guess + " Song 1",
-      guess + " Artist 1",
-      guess + " Song 2",
-    ]);
-  }, [guess]);
+
+//   // Placeholder for autocomplete logic
+//   useEffect(() => {
+//     if (!guess) return setSuggestions([]);
+//     // For now just mimic suggestion results
+//     setSuggestions([
+//       guess + " Song 1",
+//       guess + " Artist 1",
+//       guess + " Song 2",
+//     ]);
+//   }, [guess]);
 
   const handleSubmitGuess = async () => {
     if (!guess || !playerId || !gameId) return;
