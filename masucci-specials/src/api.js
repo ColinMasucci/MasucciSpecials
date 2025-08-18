@@ -27,3 +27,28 @@ export async function searchRandomTrack(token) {
   const tracks = data.tracks.items;
   return tracks[Math.floor(Math.random() * tracks.length)];
 }
+
+export async function fetchSpotifySuggestions(query, token) {
+  if (!query) return [];
+  
+  const result = await fetch(
+    `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track,artist&limit=5`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  
+  const data = await result.json();
+  const tracks = data.tracks?.items || [];
+  const artists = data.artists?.items || [];
+
+  // Combine and format suggestions
+  const suggestions = [
+    ...tracks.map(t => ({ type: 'track', name: t.name, artists: t.artists.map(a => a.name).join(", "), uri: t.uri })),
+    ...artists.map(a => ({ type: 'artist', name: a.name, uri: null }))
+  ];
+
+  return suggestions;
+}

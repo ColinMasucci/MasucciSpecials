@@ -9,23 +9,38 @@ function Player() {
   const [guess, setGuess] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [score, setScore] = useState(0);
+  const [token, setToken] = useState(null); // Spotify access token
+
 
   // Join lobby
   const handleJoin = async () => {
-    if (!gameId || !playerName) return alert("Enter a name and game code");
-    try {
-      const player = await joinGame(gameId, playerName);
-      setPlayerId(player.id);
+  if (!gameId || !playerName) return alert("Enter a name and game code");
 
-      // Subscribe to updates from host
-      subscribeToSong(gameId, (songUri) => {
-        setCurrentSong(songUri);
-      });
-    } catch (error) {
-      console.error(error);
-      alert("Failed to join game");
-    }
-  };
+  try {
+    // Join the game
+    const player = await joinGame(gameId, playerName);
+    setPlayerId(player.id);
+
+    // Get Host's Spotify token for autocomplete
+    const { data, error } = await supabase
+      .from('games')
+      .select('spotify_token')
+      .eq('id', gameId)
+      .single();
+
+    if (error) throw error;
+    setToken(data.spotify_token);
+
+    // Subscribe to updates from host
+    subscribeToSong(gameId, (songUri) => {
+      setCurrentSong(songUri);
+    });
+  } catch (error) {
+    console.error(error);
+    alert("Failed to join game");
+  }
+};
+
 
   // Placeholder for autocomplete logic
   useEffect(() => {
@@ -49,6 +64,17 @@ function Player() {
       console.error(error);
     }
   };
+
+  useEffect(() => {
+    if (!guess || !token) return setSuggestions([]);
+
+    const handler = setTimeout(async () => {
+        const results = await fetchSpotifySuggestions(guess, token);
+        setSuggestions(results);
+    }, 300); // wait 300ms after user stops typing
+
+    return () => clearTimeout(handler);
+    }, [guess, token]);
 
   return (
     <div className="flex flex-col items-center justify-start min-h-screen bg-blue-900 p-4">
@@ -109,18 +135,19 @@ function Player() {
             {suggestions.length > 0 && (
               <ul className="absolute top-full left-0 right-0 bg-white text-black rounded shadow mt-1 max-h-40 overflow-auto z-10">
                 {suggestions.map((s, i) => (
-                  <li
+                    <li
                     key={i}
                     className="p-2 hover:bg-gray-200 cursor-pointer"
                     onClick={() => {
-                      setGuess(s);
-                      setSuggestions([]);
+                        setGuess(s.name); // select suggestion
+                        setSuggestions([]);
                     }}
-                  >
-                    {s}
-                  </li>
+                    >
+                    {s.type === "track" ? `${s.name} - ${s.artists}` : s.name} 
+                    </li>
                 ))}
               </ul>
+
             )}
           </div>
 

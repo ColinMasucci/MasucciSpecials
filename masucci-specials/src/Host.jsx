@@ -5,7 +5,8 @@ import { createSpotifyPlayer, playTrack } from "./audioplayer.js";
 import { FaPlay, FaPause } from "react-icons/fa";
 import { supabase } from './supabaseClient';
 
-export async function createGame(hostId) {
+export async function createGame(hostId, token) {
+  // 1. Insert new game
   const { data, error } = await supabase
     .from('games')
     .insert([{ host_id: hostId, current_song: null }])
@@ -13,8 +14,18 @@ export async function createGame(hostId) {
     .single();
 
   if (error) throw error;
-  return data; // contains the game id
+
+  const gameId = data.id;
+
+  // 2. Insert Spotify token for this game
+  await supabase
+    .from('games')
+    .update({ spotify_token: token })
+    .eq('id', gameId);
+
+  return data; // contains gameId
 }
+
 
 export async function updateCurrentSong(gameId, trackUri) {
   const { data, error } = await supabase
@@ -135,7 +146,7 @@ function Host() {
   return (
     <div className="bg-blue-900 flex h-screen overflow-hidden">
       {/*Side Profile*/}
-      <div className="bg-blue-950 w-64 p-7">
+      <div className="bg-blue-950 w-64 p-7 overflow-hidden">
         {token ? (
           <div>
             <h1 className="text-2xl font-bold text-white flex-col pb-5">Welcome, {profile?.display_name}</h1>
@@ -180,9 +191,9 @@ function Host() {
               </button>
 
               {gameId ? (
-                <div className="flex justify-center items-center">
-                  <p className="text-center">To join game go to 'https://masucci-special.vercel.com/player' and enter code:</p>
-                  <h1 className="text-md font-bold text-center">{gameId}</h1>
+                <div className="flex flex-col justify-center items-center">
+                  <p className="text-center text-white">To join game go to 'https://masucci-special.vercel.com/player' and enter code:</p>
+                  <h1 className="text-sm font-bold text-center text-white">{gameId}</h1>
                   <button
                     onClick={async () => {
                       if (!gameId) return;
