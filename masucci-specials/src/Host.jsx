@@ -113,22 +113,40 @@ function Host() {
 
     let interval;
 
-    createSpotifyPlayer(token, (id) => {
-      setDeviceId(id);
-
-      // subscribe to state changes
-      interval = setInterval(async () => {
-        const state = await fetch(`https://api.spotify.com/v1/me/player`, {
+    interval = setInterval(async () => {
+      try {
+        const res = await fetch(`https://api.spotify.com/v1/me/player`, {
           headers: { Authorization: `Bearer ${token}` }
-        }).then(res => res.json());
+        });
 
-        if (state?.item) {
-          setCurrentTrack(state.item);
-          setIsPlaying(state.is_playing);
-          setProgressMs(state.progress_ms);
+        if (res.status === 204) {
+          // No active device
+          console.warn("No active player found");
+          return;
         }
-      }, 1000); // update every second
-    });
+
+        // Try to parse JSON safely
+        let state;
+        try {
+          state = await res.json();
+        } catch (jsonErr) {
+          console.warn("Empty response from Spotify player API");
+          return;
+        }
+
+        if (!state?.item) {
+          console.warn("No track currently playing");
+          return;
+        }
+
+        setCurrentTrack(state.item);
+        setIsPlaying(state.is_playing);
+        setProgressMs(state.progress_ms);
+      } catch (err) {
+        console.error("Failed to fetch player state:", err);
+      }
+    }, 1000);
+
 
     return () => {
       if (interval) clearInterval(interval);
@@ -262,8 +280,8 @@ function Host() {
       {/* Track Section */}
         {currentTrack ? (
           <div className="w-full bg-gray-900 p-4 flex items-center justify-items-end gap-4 shadow-lg">
-            <button onClick={setShowSongDetails(prev => !prev)}>
-              {showSongDetails ? "Show Song Details" : "Hide Song Details"}
+            <button onClick={() => setShowSongDetails(prev => !prev)}>
+              {showSongDetails ? "Hide Song Details" : "Show Song Details"}
             </button>
             {/* Song / Artist info */}
             {showSongDetails && (
