@@ -102,24 +102,59 @@ function Player() {
 
 
   const handleSubmitGuess = async () => {
-  if (!guess || !playerId || !gameId || hasGuessedCorrectly) return;
+    try {
+        // Check basic preconditions
+        if (!guess) {
+        console.warn("No guess entered.");
+        return alert("Please enter a guess before submitting!");
+        }
+        if (!playerId || !gameId) {
+        console.error("Player ID or Game ID is missing.");
+        return alert("Cannot submit guess: Player or game not set.");
+        }
+        if (!currentSong) {
+        console.warn("No current song is set yet.");
+        return alert("No song is currently playing.");
+        }
+        if (hasGuessedCorrectly) {
+        console.log("Player already guessed correctly, waiting for next song.");
+        return alert("You already guessed correctly! Wait for the next song.");
+        }
 
-  const { correct, type } = validateGuess(guess, currentSong);
-    if (!correct) {
-        alert("Incorrect! Try again.");
-        return;
+        // Validate the guess
+        const { correct, type } = validateGuess(guess, currentSong);
+        console.log("Guess validation result:", { guess, correct, type });
+
+        if (!correct) {
+        console.log("Incorrect guess submitted:", guess);
+        return alert("Incorrect! Try again.");
+        }
+
+        // Calculate points based on speed
+        const points = calculatePoints(type, startTime);
+        setScore(prev => prev + points);
+        setHasGuessedCorrectly(true);
+
+        // Attempt to submit the guess to Supabase
+        const { error } = await submitGuess(playerId, gameId, guess);
+        if (error) {
+        console.error("Failed to submit guess to database:", error);
+        return alert("Error submitting guess. Check console for details.");
+        }
+
+        // Clear input & suggestions
+        setGuess("");
+        setSuggestions([]);
+
+        console.log(`Correct guess! ${points} points awarded.`);
+        alert(`Correct! You earned ${points} points.`);
+
+    } catch (err) {
+        console.error("Unexpected error in handleSubmitGuess:", err);
+        alert("An unexpected error occurred. Check the console for details.");
     }
-
-    const points = calculatePoints(type, startTime);
-    setScore(prev => prev + points);
-    setHasGuessedCorrectly(true);
-
-    await submitGuess(playerId, gameId, guess); // record it in database if needed
-    setGuess("");
-    setSuggestions([]);
-
-    alert(`Correct! You earned ${points} points.`);
   };
+
 
 
   useEffect(() => {
