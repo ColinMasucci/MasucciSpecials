@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { redirectToAuthCodeFlow, getAccessToken } from "./auth";
 import { getUserPlaylists, getPlaylistTracks, searchRandomTrack } from "./api";
 import { createSpotifyPlayer, playTrack } from "./player";
-import { FaPlay } from "react-icons/fa";
-import { FaPause } from "react-icons/fa";
+import { FaPlay, FaPause } from "react-icons/fa";
 
 function App() {
   const [token, setToken] = useState(null);
