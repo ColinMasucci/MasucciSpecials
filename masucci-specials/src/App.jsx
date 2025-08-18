@@ -97,7 +97,7 @@ function App() {
 
     if (track?.uri) {
       await playTrack(token, deviceId, track.uri);
-      alert(`Now playing: ${track.name} by ${track.artists.map(a => a.name).join(", ")}`);
+      //alert(`Now playing: ${track.name} by ${track.artists.map(a => a.name).join(", ")}`);
     }
   };
 
@@ -112,11 +112,11 @@ function App() {
             <img className="rounded-full" src={profile?.images?.[0]?.url} alt="profile" width={100} />
             <p className="text-white">Email: {profile?.email}</p>
 
-            <h2 className="font-bold pt-10">Playlist:</h2>
+            <h2 className="font-bold pt-10 text-white pb-1">Playlist:</h2>
             <select
                 value={selectedPlaylist}
                 onChange={(e) => setSelectedPlaylist(e.target.value)}
-                className="p-2 rounded"
+                className="p-2 rounded max-w-10"
               >
                 <option value="random">Random Spotify Track</option>
                 {playlists.map(p => (
