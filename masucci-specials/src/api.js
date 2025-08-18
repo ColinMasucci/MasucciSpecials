@@ -40,6 +40,7 @@ export async function fetchSpotifySuggestions(query, token) {
     }
   );
   
+  
   const data = await result.json();
   const tracks = data.tracks?.items || [];
   const artists = data.artists?.items || [];
