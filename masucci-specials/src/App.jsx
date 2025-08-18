@@ -4,15 +4,16 @@ import { redirectToAuthCodeFlow, getAccessToken } from "./auth";
 function App() {
   const [token, setToken] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [playlists, setPlaylists] = useState([]);
+  const [deviceId, setDeviceId] = useState(null);
+  const [selectedPlaylist, setSelectedPlaylist] = useState("random");
 
+  // --- Auth
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const code = params.get("code");
 
-    if (!code) {
-      // Not logged in → show login button
-      return;
-    }
+    if (!code) return;
 
     async function fetchToken() {
       const { access_token } = await getAccessToken(code);
@@ -23,19 +24,49 @@ function App() {
     fetchToken();
   }, []);
 
+  // --- Fetch profile & playlists
   useEffect(() => {
     if (!token) return;
 
-    async function fetchProfile() {
-      const result = await fetch("https://api.spotify.com/v1/me", {
+    async function fetchData() {
+      const profileData = await fetch("https://api.spotify.com/v1/me", {
         headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await result.json();
-      setProfile(data);
+      }).then(res => res.json());
+      setProfile(profileData);
+
+      const userPlaylists = await getUserPlaylists(token);
+      setPlaylists(userPlaylists);
     }
 
-    fetchProfile();
+    fetchData();
   }, [token]);
+
+  // --- Setup Spotify Player
+  useEffect(() => {
+    if (!token) return;
+    createSpotifyPlayer(token, setDeviceId);
+  }, [token]);
+
+  // --- Play random track handler
+  const handlePlay = async () => {
+    if (!deviceId) {
+      alert("Player not ready yet!");
+      return;
+    }
+
+    let track;
+    if (selectedPlaylist === "random") {
+      track = await searchRandomTrack(token);
+    } else {
+      const tracks = await getPlaylistTracks(token, selectedPlaylist);
+      track = tracks[Math.floor(Math.random() * tracks.length)];
+    }
+
+    if (track?.uri) {
+      await playTrack(token, deviceId, track.uri);
+      alert(`Now playing: ${track.name} by ${track.artists.map(a => a.name).join(", ")}`);
+    }
+  };
 
 
   return (
@@ -45,7 +76,7 @@ function App() {
         {token ? (
           <div>
             <h1 className="text-2xl font-bold text-white flex-col pb-5">Welcome, {profile?.display_name}</h1>
-            <p>Email: {profile?.email}</p>
+            <p className="text-white">Email: {profile?.email}</p>
             <img className="rounded-full" src={profile?.images?.[0]?.url} alt="profile" width={100} />
           </div>
         ):(
@@ -64,7 +95,24 @@ function App() {
       <div className="flex flex-col justify-start flex-1 p-7">
         <h1 className="font-bold text-white text-center pb-5">🎵The Masucci Heardle Special🎵</h1>
         {token ? (
-          <div></div>
+          <div className="flex flex-col gap-3">
+            <select
+              value={selectedPlaylist}
+              onChange={(e) => setSelectedPlaylist(e.target.value)}
+              className="p-2 rounded"
+            >
+              <option value="random">Random Spotify Track</option>
+              {playlists.map(p => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+            <button
+              onClick={handlePlay}
+              className="bg-green-500 text-white px-4 py-2 rounded"
+            >
+              Play Random Song
+            </button>
+          </div>
         ):(
           <div>
             <p className="text-white text-center">Login to your Spotify Account in order to use Application</p>
