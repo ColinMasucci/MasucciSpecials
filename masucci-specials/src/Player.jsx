@@ -97,11 +97,11 @@ function Player() {
   };
 
   useEffect(() => {
-    if (!currentSong) return;
+    if (!currentSongName) return;
 
     setHasGuessedCorrectly(false);
     setStartTime(Date.now()); // start the timer
-  }, [currentSong]);
+  }, [currentSongName]);
 
 
   const handleSubmitGuess = async () => {
@@ -115,7 +115,7 @@ function Player() {
         console.error("Player ID or Game ID is missing.");
         return alert("Cannot submit guess: Player or game not set.");
         }
-        if (!currentSong) {
+        if (!currentSongName) {
         console.warn("No current song is set yet.");
         return alert("No song is currently playing.");
         }
