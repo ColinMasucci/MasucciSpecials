@@ -3,6 +3,37 @@ import { joinGame, subscribeToSong, submitGuess } from "./playerLogic";
 import { supabase } from './supabaseClient';
 import { fetchSpotifySuggestions } from "./api";
 
+
+function validateGuess(guess, currentSong) {
+  if (!currentSong) return { correct: false, type: null };
+
+  const normalizedGuess = guess.trim().toLowerCase();
+  const correctTrack = currentSong.trackName.toLowerCase();
+  const correctArtist = currentSong.artistName.toLowerCase();
+
+  const isTrackCorrect = normalizedGuess.includes(correctTrack);
+  const isArtistCorrect = normalizedGuess.includes(correctArtist);
+
+  return {
+    correct: isTrackCorrect || isArtistCorrect,
+    type: isTrackCorrect && isArtistCorrect ? "full" : isArtistCorrect ? "artist" : null
+  };
+}
+
+function calculatePoints(type, startTime) {
+  const elapsedSeconds = (Date.now() - startTime) / 1000;
+
+  if (type === "full") {
+    // Full points decrease over time (e.g., max 25, min 5)
+    return Math.max(5, Math.round(25 - elapsedSeconds / 2));
+  } else if (type === "artist") {
+    // Artist only (max 10, min 2)
+    return Math.max(2, Math.round(10 - elapsedSeconds / 5));
+  }
+  return 0;
+}
+
+
 function Player() {
   const [gameId, setGameId] = useState(""); // Game code the player enters
   const [playerName, setPlayerName] = useState("");
@@ -14,6 +45,9 @@ function Player() {
   const [token, setToken] = useState(null); // Spotify access token
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const [hasGuessedCorrectly, setHasGuessedCorrectly] = useState(false);
+  const [startTime, setStartTime] = useState(null);
+
 
 
   // Join lobby
@@ -59,18 +93,34 @@ function Player() {
     }
   };
 
+  useEffect(() => {
+    if (!currentSong) return;
+
+    setHasGuessedCorrectly(false);
+    setStartTime(Date.now()); // start the timer
+  }, [currentSong]);
+
 
   const handleSubmitGuess = async () => {
-    if (!guess || !playerId || !gameId) return;
-    try {
-      await submitGuess(playerId, gameId, guess);
-      setGuess("");
-      setSuggestions([]);
-      // score increment can be added later when validating
-    } catch (error) {
-      console.error(error);
+  if (!guess || !playerId || !gameId || hasGuessedCorrectly) return;
+
+  const { correct, type } = validateGuess(guess, currentSong);
+    if (!correct) {
+        alert("Incorrect! Try again.");
+        return;
     }
+
+    const points = calculatePoints(type, startTime);
+    setScore(prev => prev + points);
+    setHasGuessedCorrectly(true);
+
+    await submitGuess(playerId, gameId, guess); // record it in database if needed
+    setGuess("");
+    setSuggestions([]);
+
+    alert(`Correct! You earned ${points} points.`);
   };
+
 
   useEffect(() => {
     if (!guess || !token) return setSuggestions([]);
