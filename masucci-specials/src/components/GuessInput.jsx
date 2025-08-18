@@ -52,3 +52,5 @@ function GuessInput({ suggestions, setGuess, setSuggestions }) {
     </div>
   );
 }
+
+export default GuessInput;
