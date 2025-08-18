@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { joinGame, subscribeToSong, submitGuess } from "./playerLogic";
 import { supabase } from './supabaseClient';
+import { fetchSpotifySuggestions } from "./api";
 
 function Player() {
   const [gameId, setGameId] = useState(""); // Game code the player enters
@@ -21,8 +22,6 @@ function Player() {
 
     try {
         console.log("Attempting to join game:", gameId, "as player:", playerName);
-        console.log("handleJoin called with gameId:", typeof gameId, gameId);
-
 
         // 1. Join the game
         const player = await joinGame(gameId, playerName);
