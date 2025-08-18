@@ -84,7 +84,7 @@ function Player() {
         subscribeToSong(gameId, (songName, songArtist) => {
         console.log("Received song update:", songName, " - ", songArtist);
         setCurrentSongName(songName);
-        setCurrentSongArtist(songArtist)
+        setCurrentSongArtist(songArtist);
         });
 
         // 4. Optionally, indicate player has successfully joined
@@ -139,7 +139,13 @@ function Player() {
         setHasGuessedCorrectly(true);
 
         // Attempt to submit the guess to Supabase
-        const { error } = await submitGuess(playerId, gameId, guess);
+        const result = await submitGuess(playerId, gameId, guess);
+        if (!result) {
+        console.error("submitGuess returned null or undefined!");
+        return alert("Error submitting guess. Check console.");
+        }
+
+        const { error } = result;
         if (error) {
         console.error("Failed to submit guess to database:", error);
         return alert("Error submitting guess. Check console for details.");

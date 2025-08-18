@@ -32,10 +32,14 @@ export function subscribeToSong(gameId, callback) {
 }
 
 export async function submitGuess(playerId, gameId, guess) {
-  const { data, error } = await supabase
-    .from('guesses')
-    .insert([{ player_id: playerId, game_id: gameId, guess }]);
+  try {
+    const { data, error } = await supabase
+      .from('guesses')
+      .insert([{ player_id: playerId, game_id: gameId, guess }]);
 
-  if (error) throw error;
-  return data;
+    return { data, error }; // always return an object
+  } catch (err) {
+    console.error("submitGuess failed:", err);
+    return { data: null, error: err }; // return error object
+  }
 }
