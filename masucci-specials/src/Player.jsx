@@ -83,16 +83,17 @@ function Player() {
     return () => clearTimeout(handler);
   }, [guess, token]);
 
-    // Close dropdown on outside click
+  // Close dropdown on outside click
   useEffect(() => {
     function handleClickOutside(event) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setOpen(false);
-      }
+        }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
 
   return (
     <div className="flex flex-col items-center justify-start min-h-screen bg-blue-900 p-4">
@@ -140,33 +141,38 @@ function Player() {
           <p className="text-white text-sm">Current song is playing...</p>
 
           {/* Guess input */}
-          <div ref={dropdownRef} className="relative">
+          <div ref={dropdownRef} className="relative w-full">
             <input
-              type="text"
-              placeholder="Guess song or artist"
-              value={guess}
-              onChange={(e) => setGuess(e.target.value)}
-              className="w-full p-2 rounded text-black"
+                type="text"
+                placeholder="Guess song or artist"
+                value={guess}
+                onFocus={() => setOpen(true)}
+                onChange={(e) => {
+                setGuess(e.target.value);
+                setOpen(true); // open dropdown whenever typing
+                }}
+                className="w-full p-2 rounded text-black"
             />
 
-            {/* Autocomplete dropdown */}
-            {suggestions.length > 0 && (
+            {open && suggestions.length > 0 && (
                 <ul className="absolute top-full left-0 right-0 bg-white text-black rounded shadow mt-1 max-h-40 overflow-auto z-10">
-                    {suggestions.map((s, i) => (
+                {suggestions.map((s, i) => (
                     <li
-                        key={i}
-                        className="p-2 hover:bg-gray-200 cursor-pointer"
-                        onClick={() => {
-                        setGuess(s.display); // sets guess as "song - artist"
+                    key={i}
+                    className="p-2 hover:bg-gray-200 cursor-pointer"
+                    onClick={() => {
+                        setGuess(s.display);
                         setSuggestions([]);
-                        }}
+                        setOpen(false); // close dropdown after selection
+                    }}
                     >
-                        {s.display}
+                    {s.display}
                     </li>
-                    ))}
+                ))}
                 </ul>
             )}
           </div>
+
 
           {/* Submit button */}
           <button
