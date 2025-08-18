@@ -157,7 +157,7 @@ function Host() {
             <select
                 value={selectedPlaylist}
                 onChange={(e) => setSelectedPlaylist(e.target.value)}
-                className="p-2 rounded max-w-35"
+                className="p-2 rounded max-w-25"
               >
                 <option value="random">Random Spotify Track</option>
                 {playlists.map(p => (
@@ -193,7 +193,7 @@ function Host() {
               {gameId ? (
                 <div className="flex flex-col justify-center items-center">
                   <p className="text-center text-white">To join game go to 'https://masucci-special.vercel.com/player' and enter code:</p>
-                  <h1 className="text-sm font-bold text-center text-white">{gameId}</h1>
+                  <h1 className="text-md font-bold text-center text-white">{gameId}</h1>
                   <button
                     onClick={async () => {
                       if (!gameId) return;
@@ -214,7 +214,7 @@ function Host() {
                       if (!profile) return alert("Profile not loaded yet!");
                       
                       try {
-                        const game = await createGame(profile.id); // use Spotify profile ID as hostId
+                        const game = await createGame(profile.id, token); // use Spotify profile ID as hostId
                         setGameId(game.id);
                         alert(`Lobby created! Share this code with players: ${game.id.slice(0, 6)}`);
                       } catch (error) {
