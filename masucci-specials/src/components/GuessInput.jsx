@@ -40,9 +40,12 @@ function GuessInput({ suggestions, setGuess, setSuggestions }) {
               key={i}
               className="p-2 hover:bg-gray-200 cursor-pointer"
               onClick={() => {
-                setGuess(s.name);
+                setGuess(s.type === "track" 
+                    ? `${s.name} - ${s.artists.map(a => a.name).join(", ")}`
+                    : s.name
+                );
                 setSuggestions([]);
-                setOpen(false); // close after selecting
+                setOpen(false);
               }}
             >
               {s.type === "track" ? `${s.name} - ${s.artists}` : s.name}
