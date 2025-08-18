@@ -33,28 +33,24 @@ function GuessInput({ suggestions, setGuess, setSuggestions }) {
         }}
       />
 
-      {open && suggestions.length > 0 && (
-        <ul className="absolute top-full left-0 right-0 bg-white text-black rounded shadow mt-1 max-h-40 overflow-auto z-10">
-          {suggestions.map((s, i) => (
-            <li
-              key={i}
-              className="p-2 hover:bg-gray-200 cursor-pointer"
-              onClick={() => {
-                setGuess(s.type === "track" 
-                    ? `${s.name} - ${s.artists.map(a => a.name).join(", ")}`
-                    : s.name
-                );
-                setSuggestions([]);
-                setOpen(false);
-              }}
-            >
-              {s.type === "track" 
-                ? `${s.name} - ${s.artists.map(a => a.name).join(", ")}`
-                : s.name}
-            </li>
-          ))}
-        </ul>
-      )}
+      {/* Autocomplete dropdown */}
+        {suggestions.length > 0 && (
+            <ul className="absolute top-full left-0 right-0 bg-white text-black rounded shadow mt-1 max-h-40 overflow-auto z-10">
+            {suggestions.map((s, i) => (
+                <li
+                key={i}
+                className="p-2 hover:bg-gray-200 cursor-pointer"
+                onClick={() => {
+                    setGuess(s.name); // select suggestion
+                    setSuggestions([]);
+                }}
+                >
+                {s.type === "track" ? `${s.name} - ${s.artists}` : s.name} 
+                </li>
+            ))}
+            </ul>
+
+        )}
     </div>
   );
 }
