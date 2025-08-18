@@ -9,7 +9,7 @@ export async function createGame(hostId, token) {
   // 1. Insert new game
   const { data, error } = await supabase
     .from('games')
-    .insert([{ host_id: hostId, current_song: null }])
+    .insert([{ host_id: hostId, current_song_uri: null, current_song_name: null, current_song_artist: null }])
     .select()
     .single();
 
