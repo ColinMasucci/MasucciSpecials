@@ -125,33 +125,34 @@ function App() {
         )}
       </div>
 
-      <div className="flex flex-col justify-between flex-1 p-7">
-        <h1 className="font-bold text-white text-center pb-5">🎵The Masucci Heardle Special🎵</h1>
-        {token ? (
-          <div className="flex flex-col gap-3">
-            <select
-              value={selectedPlaylist}
-              onChange={(e) => setSelectedPlaylist(e.target.value)}
-              className="p-2 rounded"
-            >
-              <option value="random">Random Spotify Track</option>
-              {playlists.map(p => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
-            <button
-              onClick={handlePlay}
-              className="bg-green-500 text-white px-4 py-2 rounded"
-            >
-              Play Random Song
-            </button>
-          </div>
-        ):(
-          <div>
-            <p className="text-white text-center">Login to your Spotify Account in order to use Application</p>
-          </div>
-        )}
-      </div>
+      <div className="flex flex-col justify-between flex-1">
+        <div className="flex flex-col justify-start flex-1 p-7">
+          <h1 className="font-bold text-white text-center pb-5">🎵The Masucci Heardle Special🎵</h1>
+          {token ? (
+            <div className="flex flex-col gap-3">
+              <select
+                value={selectedPlaylist}
+                onChange={(e) => setSelectedPlaylist(e.target.value)}
+                className="p-2 rounded"
+              >
+                <option value="random">Random Spotify Track</option>
+                {playlists.map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+              <button
+                onClick={handlePlay}
+                className="bg-green-500 text-white px-4 py-2 rounded"
+              >
+                Play Random Song
+              </button>
+            </div>
+          ):(
+            <div>
+              <p className="text-white text-center">Login to your Spotify Account in order to use Application</p>
+            </div>
+          )}
+        </div>
 
       {/* Track Section */}
         {currentTrack ? (
@@ -215,6 +216,9 @@ function App() {
             </button>
           </div>
         )}
+
+
+      </div>
       
     </div>
   );
