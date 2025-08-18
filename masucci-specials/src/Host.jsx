@@ -38,6 +38,9 @@ function Host() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progressMs, setProgressMs] = useState(0); // current position in ms
 
+  const [gameId, setGameId] = useState(null);
+
+
   // --- Auth
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -118,6 +121,13 @@ function Host() {
     if (track?.uri) {
       await playTrack(token, deviceId, track.uri);
       //alert(`Now playing: ${track.name} by ${track.artists.map(a => a.name).join(", ")}`);
+      if (gameId) {
+        try {
+          await updateCurrentSong(gameId, track.uri);
+        } catch (error) {
+          console.error("Failed to update current song:", error);
+        }
+      }
     }
   };
 
@@ -136,7 +146,7 @@ function Host() {
             <select
                 value={selectedPlaylist}
                 onChange={(e) => setSelectedPlaylist(e.target.value)}
-                className="p-2 rounded max-w-50"
+                className="p-2 rounded max-w-20"
               >
                 <option value="random">Random Spotify Track</option>
                 {playlists.map(p => (
@@ -168,6 +178,45 @@ function Host() {
               >
                 Next Song
               </button>
+
+              {gameId ? (
+                <div>
+                  <p>To join game go to 'https://masucci-special.vercel.com/player' and enter code:</p>
+                  <h2 className="text-lg">{gameId}</h2>
+                  <button
+                    onClick={async () => {
+                      if (!gameId) return;
+                      await supabase.from("games").delete().eq("id", gameId);
+                      setGameId(null);
+                      alert("Lobby closed!");
+                    }}
+                    className="bg-red-500 text-white px-4 py-2 rounded"
+                  >
+                    End Lobby
+                  </button>
+                </div>
+              ):
+              (
+                <div>
+                  <button
+                    onClick={async () => {
+                      if (!profile) return alert("Profile not loaded yet!");
+                      
+                      try {
+                        const game = await createGame(profile.id); // use Spotify profile ID as hostId
+                        setGameId(game.id);
+                        alert(`Lobby created! Share this code with players: ${game.id.slice(0, 6)}`);
+                      } catch (error) {
+                        console.error(error);
+                        alert("Failed to create lobby.");
+                      }
+                    }}
+                    className="bg-green-500 text-white px-4 py-2 rounded"
+                  >
+                    Create Lobby
+                  </button>
+                </div>
+              )}
             </div>
           ):(
             <div>
