@@ -6,7 +6,7 @@ import Player from "./Player.jsx";
 function App() {
 
     return (
-        <BrowserRouter>
+        <BrowserRouter basename="/">
             <Routes>
                 <Route path="/" element={<Host />} />
                 <Route path="/host" element={<Host />} />
