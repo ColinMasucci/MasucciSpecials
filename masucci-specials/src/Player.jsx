@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { joinGame, subscribeToSong, submitGuess } from "./playerLogic";
 import { supabase } from './supabaseClient';
 import { fetchSpotifySuggestions } from "./api";
-import GuessInput from "./components/GuessInput"
 
 function Player() {
   const [gameId, setGameId] = useState(""); // Game code the player enters
@@ -10,8 +9,11 @@ function Player() {
   const [playerId, setPlayerId] = useState(null);
   const [currentSong, setCurrentSong] = useState(null);
   const [guess, setGuess] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
   const [score, setScore] = useState(0);
   const [token, setToken] = useState(null); // Spotify access token
+  const [open, setOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
 
   // Join lobby
@@ -61,13 +63,37 @@ function Player() {
   const handleSubmitGuess = async () => {
     if (!guess || !playerId || !gameId) return;
     try {
-        await submitGuess(playerId, gameId, guess);
-        setGuess(""); // reset input after submission
+      await submitGuess(playerId, gameId, guess);
+      setGuess("");
+      setSuggestions([]);
+      // score increment can be added later when validating
     } catch (error) {
-        console.error(error);
+      console.error(error);
     }
   };
 
+  useEffect(() => {
+    if (!guess || !token) return setSuggestions([]);
+
+    const handler = setTimeout(async () => {
+        const results = await fetchSpotifySuggestions(guess, token);
+        setSuggestions(results);
+    }, 300); // wait 300ms after user stops typing
+
+    return () => clearTimeout(handler);
+    }, [guess, token]);
+
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <div className="flex flex-col items-center justify-start min-h-screen bg-blue-900 p-4">
@@ -115,11 +141,33 @@ function Player() {
           <p className="text-white text-sm">Current song is playing...</p>
 
           {/* Guess input */}
-          <div className="relative">
-            <GuessInput
-                token={token}
-                onSelect={(selectedGuess) => setGuess(selectedGuess)}
+          <div ref={dropdownRef} className="relative">
+            <input
+              type="text"
+              placeholder="Guess song or artist"
+              value={guess}
+              onChange={(e) => setGuess(e.target.value)}
+              className="w-full p-2 rounded text-black"
             />
+
+            {/* Autocomplete dropdown */}
+            {suggestions.length > 0 && (
+              <ul className="absolute top-full left-0 right-0 bg-white text-black rounded shadow mt-1 max-h-40 overflow-auto z-10">
+                {suggestions.map((s, i) => (
+                    <li
+                    key={i}
+                    className="p-2 hover:bg-gray-200 cursor-pointer"
+                    onClick={() => {
+                        setGuess(s.name); // select suggestion
+                        setSuggestions([]);
+                    }}
+                    >
+                    {s.type === "track" ? `${s.name} - ${s.artists}` : s.name} 
+                    </li>
+                ))}
+              </ul>
+
+            )}
           </div>
 
           {/* Submit button */}
