@@ -1,0 +1,51 @@
+import { supabase } from './supabaseClient';
+
+export async function joinGame(gameId, playerName) {
+  const { data, error } = await supabase
+    .from('players')
+    .insert([{ game_id: gameId, name: playerName }])
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data; // contains player id
+}
+
+export function subscribeToSong(gameId, callback) {
+  return supabase
+    .channel('game-updates')
+    .on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'games',
+        filter: `id=eq.${gameId}`,
+      },
+      (payload) => {
+        callback(payload.new.current_song);
+      }
+    )
+    .subscribe();
+}
+
+export async function submitGuess(playerId, gameId, guess) {
+  const { data, error } = await supabase
+    .from('guesses')
+    .insert([{ player_id: playerId, game_id: gameId, guess }]);
+
+  if (error) throw error;
+  return data;
+}
+
+
+function Player() {
+
+    return (
+        <div>
+            <h1>This is the player Page</h1>
+        </div>
+    );
+}
+
+export default Player;
