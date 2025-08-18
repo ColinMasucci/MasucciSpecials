@@ -278,7 +278,7 @@ function Host() {
               {gameId ? (
                 <div className="flex flex-col justify-center items-center">
                   <p className="text-center text-white">To join game go to 'https://masucci-special.vercel.com/player' and enter code:</p>
-                  <h2 className="text-4xl font-bold text-center text-white">{gameCode}</h2>
+                  <h2 className="text-4xl font-bold text-center text-white pb-5">{gameCode}</h2>
                   <button
                     onClick={async () => {
                       if (!gameId) return;
@@ -319,7 +319,7 @@ function Host() {
                       try {
                         const game = await createGame(profile.id, token); // use Spotify profile ID as hostId
                         setGameId(game.id);
-                        setGameCode(game.game_code);
+                        setGameCode((game.game_code).toUpperCase());
                         alert(`Lobby created! Share this code with players: ${game.game_code.slice(0, 6)}`);
                       } catch (error) {
                         console.error(error);

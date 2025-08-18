@@ -71,18 +71,19 @@ function Player() {
 
         if (gameError || !game) throw new Error("Game not found");
 
-        setGameId(game.id); // actual UUID for the game
+        const currentGameId = game.id
+        setGameId(currentGameId); // actual UUID for the game
         setToken(game.spotify_token); // set Spotify token
         console.log("Game UUID:", game.id, "Spotify token:", game.spotify_token);
 
         // 1. Join the game using the actual UUID
-        const player = await joinGame(gameId, playerName);
+        const player = await joinGame(currentGameId, playerName);
         if (!player || !player.id) throw new Error("Failed to create player entry");
         setPlayerId(player.id);
         console.log("Joined as player:", player);
 
         // 2. Subscribe to song updates
-        subscribeToSong(gameId, (songName, songArtist) => {
+        subscribeToSong(currentGameId, (songName, songArtist) => {
             console.log("Received song update:", songName, " - ", songArtist);
             setCurrentSongName(songName);
             setCurrentSongArtist(songArtist);
