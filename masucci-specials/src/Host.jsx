@@ -69,6 +69,8 @@ function Host() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progressMs, setProgressMs] = useState(0); // current position in ms
   const [showSongDetails, setShowSongDetails] = useState(true); //for displaying song artist and name
+  const [players, setPlayers] = useState([]);
+
 
   const [gameId, setGameId] = useState(null);
   const [gameCode, setGameCode] = useState(null);
@@ -186,6 +188,46 @@ function Host() {
   };
 
 
+
+  useEffect(() => {
+    if (!gameId) return;
+
+    // Initial fetch
+    const fetchPlayers = async () => {
+      const { data, error } = await supabase
+        .from("players")
+        .select("id, name, score")
+        .eq("game_id", gameId)
+        .order("score", { ascending: false });
+
+      if (error) console.error("Error fetching players:", error);
+      else setPlayers(data || []);
+    };
+
+    fetchPlayers();
+
+    // Subscribe to realtime changes
+    const channel = supabase
+      .channel("players-scores")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "players", filter: `game_id=eq.${gameId}` },
+        (payload) => {
+          console.log("Leaderboard update:", payload);
+          fetchPlayers(); // refresh players list
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [gameId]);
+
+
+
+
+
   return (
     <div className="bg-blue-900 flex h-screen overflow-hidden">
       {/*Side Profile*/}
@@ -248,6 +290,24 @@ function Host() {
                   >
                     End Lobby
                   </button>
+
+                  {players.length > 0 && (
+                    <div className="mt-6 bg-blue-800 rounded-2xl shadow-lg p-6 text-white w-full max-w-lg mx-auto">
+                      <h2 className="text-xl font-bold mb-4 text-center">🏆 Leaderboard</h2>
+                      <ul className="divide-y divide-blue-600">
+                        {players.map((p, index) => (
+                          <li
+                            key={p.id}
+                            className="flex justify-between items-center py-2"
+                          >
+                            <span className="font-semibold">{index + 1}. {p.name}</span>
+                            <span className="text-lg">{p.score}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
                 </div>
               ):
               (
