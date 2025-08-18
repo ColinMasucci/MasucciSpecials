@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { redirectToAuthCodeFlow, getAccessToken } from "./auth";
 import { getUserPlaylists, getPlaylistTracks, searchRandomTrack } from "./api";
 import { createSpotifyPlayer, playTrack } from "./player";
+import { FaPlay } from "react-icons/fa";
+import { FaPause } from "react-icons/fa";
 
 function App() {
   const [token, setToken] = useState(null);
@@ -124,7 +126,7 @@ function App() {
         )}
       </div>
 
-      <div className="flex flex-col justify-start flex-1 p-7">
+      <div className="flex flex-col justify-between flex-1 p-7">
         <h1 className="font-bold text-white text-center pb-5">🎵The Masucci Heardle Special🎵</h1>
         {token ? (
           <div className="flex flex-col gap-3">
@@ -144,63 +146,76 @@ function App() {
             >
               Play Random Song
             </button>
-
-
-            {currentTrack && (
-              <div className="absolute bottom-0 left-0 right-0 bg-gray-900 p-4 flex items-center gap-4 shadow-lg">
-                
-                {/* Song / Artist info */}
-                <div className="flex flex-col text-white flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold">{currentTrack.name}</span>
-                    <img src={currentTrack.album.images[2]?.url} alt="song" className="w-6 h-6 rounded" />
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-400">
-                    <span>{currentTrack.artists.map(a => a.name).join(", ")}</span>
-                    <img src={currentTrack.album.images[2]?.url} alt="artist" className="w-4 h-4 rounded-full" />
-                  </div>
-                </div>
-
-                {/* Progress bar */}
-                <div className="flex flex-col items-center w-1/2">
-                  <div className="w-full h-1 bg-gray-700 rounded">
-                    <div
-                      className="h-1 bg-green-500 rounded"
-                      style={{ width: `${(progressMs / currentTrack.duration_ms) * 100}%` }}
-                    />
-                  </div>
-                  <span className="text-xs text-gray-300 mt-1">
-                    {Math.floor(progressMs / 60000)}:{String(Math.floor((progressMs / 1000) % 60)).padStart(2, "0")}
-                  </span>
-                </div>
-
-                {/* Play / Pause button */}
-                <button
-                  onClick={async () => {
-                    const method = isPlaying ? "pause" : "play";
-                    await fetch(`https://api.spotify.com/v1/me/player/${method}?device_id=${deviceId}`, {
-                      method: "PUT",
-                      headers: { Authorization: `Bearer ${token}` },
-                    });
-                    setIsPlaying(!isPlaying);
-                  }}
-                  className="text-white text-2xl"
-                >
-                  {isPlaying ? "⏸" : "▶️"}
-                </button>
-
-              </div>
-            )}
-
           </div>
         ):(
           <div>
             <p className="text-white text-center">Login to your Spotify Account in order to use Application</p>
           </div>
         )}
-
-
       </div>
+
+      {/* Track Section */}
+        {currentTrack ? (
+          <div className="w-full bg-gray-900 p-4 flex items-center justify-items-end gap-4 shadow-lg">
+            
+            {/* Song / Artist info */}
+            <div className="flex flex-col text-white flex-1">
+              <div className="flex items-center gap-2">
+                <span className="font-bold">{currentTrack.name}</span>
+                <img src={currentTrack.album.images[2]?.url} alt="song" className="w-6 h-6 rounded" />
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <span>{currentTrack.artists.map(a => a.name).join(", ")}</span>
+                <img src={currentTrack.album.images[2]?.url} alt="artist" className="w-4 h-4 rounded-full" />
+              </div>
+            </div>
+
+            {/* Progress bar */}
+            <div className="flex flex-col items-center w-1/2">
+              <div className="w-full h-1 bg-gray-700 rounded">
+                <div
+                  className="h-1 bg-green-500 rounded"
+                  style={{ width: `${(progressMs / currentTrack.duration_ms) * 100}%` }}
+                />
+              </div>
+              <span className="text-xs text-gray-300 mt-1">
+                {Math.floor(progressMs / 60000)}:{String(Math.floor((progressMs / 1000) % 60)).padStart(2, "0")}
+              </span>
+            </div>
+
+            {/* Play / Pause button */}
+            <button
+              onClick={async () => {
+                const method = isPlaying ? "pause" : "play";
+                await fetch(`https://api.spotify.com/v1/me/player/${method}?device_id=${deviceId}`, {
+                  method: "PUT",
+                  headers: { Authorization: `Bearer ${token}` },
+                });
+                setIsPlaying(!isPlaying);
+              }}
+              className="text-white text-2xl rounded-full bg-green-500"
+            >
+              {isPlaying ? <FaPlay /> : <FaPause/>}
+            </button>
+
+          </div>
+        ):
+        (
+          <div className="w-full bg-gray-900 p-4 flex items-center justify-items-end gap-4 shadow-lg">
+            {/* Progress bar */}
+            <div className="flex flex-col items-center w-1/2">
+              <div className="w-full h-1 bg-gray-700 rounded"></div>
+              <span className="text-xs text-gray-300 mt-1">
+                0:00
+              </span>
+            </div>
+
+            {/* Play / Pause button */}
+            <button className="text-white text-2xl rounded-full bg-green-500">
+              <FaPlay />
+            </button>
+          </div>
+        )}
       
     </div>
   );
