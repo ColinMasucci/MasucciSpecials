@@ -30,26 +30,27 @@ export async function searchRandomTrack(token) {
 
 export async function fetchSpotifySuggestions(query, token) {
   if (!query) return [];
-  
+
   const result = await fetch(
-    `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track,artist&limit=10`,
+    `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=10`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     }
   );
-  
-  
+
   const data = await result.json();
   const tracks = data.tracks?.items || [];
-  const artists = data.artists?.items || [];
 
-  // Combine and format suggestions
-  const suggestions = [
-    ...tracks.map(t => ({ type: 'track', name: t.name, artists: t.artists.map(a => a.name).join(", "), uri: t.uri })),
-    ...artists.map(a => ({ type: 'artist', name: a.name, uri: null }))
-  ];
+  // Only return tracks, formatted as "song - artist"
+  const suggestions = tracks.map(t => ({
+    type: 'track',
+    display: `${t.name} - ${t.artists.map(a => a.name).join(", ")}`,
+    uri: t.uri,
+    song: t.name,
+    artist: t.artists.map(a => a.name).join(", ")
+  }));
 
   return suggestions;
 }

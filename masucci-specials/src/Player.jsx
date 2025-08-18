@@ -150,21 +150,20 @@ function Player() {
 
             {/* Autocomplete dropdown */}
             {suggestions.length > 0 && (
-              <ul className="absolute top-full left-0 right-0 bg-white text-black rounded shadow mt-1 max-h-40 overflow-auto z-10">
-                {suggestions.map((s, i) => (
+                <ul className="absolute top-full left-0 right-0 bg-white text-black rounded shadow mt-1 max-h-40 overflow-auto z-10">
+                    {suggestions.map((s, i) => (
                     <li
-                    key={i}
-                    className="p-2 hover:bg-gray-200 cursor-pointer"
-                    onClick={() => {
-                        setGuess(s.name); // select suggestion
+                        key={i}
+                        className="p-2 hover:bg-gray-200 cursor-pointer"
+                        onClick={() => {
+                        setGuess(s.display); // sets guess as "song - artist"
                         setSuggestions([]);
-                    }}
+                        }}
                     >
-                    {s.type === "track" ? `${s.name} - ${s.artists}` : s.name} 
+                        {s.display}
                     </li>
-                ))}
-              </ul>
-
+                    ))}
+                </ul>
             )}
           </div>
 
