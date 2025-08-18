@@ -48,7 +48,9 @@ function GuessInput({ suggestions, setGuess, setSuggestions }) {
                 setOpen(false);
               }}
             >
-              {s.type === "track" ? `${s.name} - ${s.artists}` : s.name}
+              {s.type === "track" 
+                ? `${s.name} - ${s.artists.map(a => a.name).join(", ")}`
+                : s.name}
             </li>
           ))}
         </ul>
